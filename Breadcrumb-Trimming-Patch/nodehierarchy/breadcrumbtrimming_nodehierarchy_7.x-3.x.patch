@@ -1,0 +1,78 @@
+diff --git a/nodehierarchy.module b/nodehierarchy.module
+index 9dd6800..cef6246 100644
+--- a/nodehierarchy.module
++++ b/nodehierarchy.module
+@@ -1433,9 +1433,9 @@ function nodehierarchy_set_breadcrumbs($node, $add_node = FALSE) {
+   $breadcrumb = empty($breadcrumbs[0]) ? array() : (array)$breadcrumbs[0];
+ 
+   // Remove the node itself if it's not needed (we would want it for the children tab for example).
+-  if (!$add_node) {
+-    array_pop($breadcrumb);
+-  }
++  //if (!$add_node) {
++  //  array_pop($breadcrumb);
++  //}
+ 
+   // Stick the home link on the top of the breadcrumb.
+   array_unshift($breadcrumb, l(t('Home'), '<front>'));
+@@ -1450,13 +1450,59 @@ function nodehierarchy_set_breadcrumbs($node, $add_node = FALSE) {
+  */
+ function nodehierarchy_get_breadcrumbs($nid) {
+   $breadcrumbs = array();
++  
++  /****** START Customization by Craig Vanderlinden ******/
++  
++  $menu_link_trails = _nodehierarchy_get_node_ancestor_menu_links($nid);
++  
++  $maxlength = 125;         // Total possible length of crumbs
++  $numofcrumbs = 0;         // Start at one because of home link
++  $trim = 0;                // Trimming length
++
++  // Count the number of crumbs in links
++  foreach ($menu_link_trails as $menu_links) {
++    foreach ($menu_links as $menu_link) {
++      $numofcrumbs++;
++    }
++  }
++  $maxlength = $maxlength - (3 * $numofcrumbs);
+ 
++  // Allowed size per breadcrumb
++  if ($numofcrumbs == 0)
++  {
++    $numofcrumbs = 1;
++  }
++  $singlelength = floor($maxlength / $numofcrumbs) + 1;
++  
++  /****** END Customization by Craig Vanderlinden ******/
++  
+   // Retrieve the descendent list of menu links and convert them to a breadcrumb trail.
+   $menu_link_trails = _nodehierarchy_get_node_ancestor_menu_links($nid);
+   foreach ($menu_link_trails as $menu_links) {
+     $breadcrumb = array();
+     foreach ($menu_links as $menu_link) {
+-      $breadcrumb[] = l($menu_link['link_title'], $menu_link['link_path']);
++	  if (strlen($menu_link['link_title']) <= $singlelength) {
++	    $trim = strlen($menu_link['link_title']);
++		$maxlength = $maxlength - $trim;
++        $numofcrumbs--;
++		if ($numofcrumbs == 0)
++		{
++          $numofcrumbs = 1;
++		}
++        $singlelength = floor($maxlength / $numofcrumbs);
++		$breadcrumb[] = l(substr($menu_link['link_title'], 0, $trim), $menu_link['link_path']);
++	  }
++	  else {
++		$trim = $singlelength - 2;
++		$maxlength = $maxlength - $trim;
++		$numofcrumbs--;
++		if ($numofcrumbs == 0)
++		{
++          $numofcrumbs = 1;
++		}
++        $singlelength = floor($maxlength / $numofcrumbs);
++		$breadcrumb[] = l(substr($menu_link['link_title'], 0, $trim).'...', $menu_link['link_path']);
++	  }
+     }
+     $breadcrumbs[] = $breadcrumb;
+   }

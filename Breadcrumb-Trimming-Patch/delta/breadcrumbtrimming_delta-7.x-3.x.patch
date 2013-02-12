@@ -1,0 +1,24 @@
+diff --git a/delta_blocks/includes/delta_blocks.theme.inc b/delta_blocks/includes/delta_blocks.theme.inc
+index fe1f7c5..e3b5cab 100644
+--- a/delta_blocks/includes/delta_blocks.theme.inc
++++ b/delta_blocks/includes/delta_blocks.theme.inc
+@@ -134,7 +134,9 @@ function theme_delta_blocks_breadcrumb($variables) {
+     $output = '<div id="breadcrumb" class="clearfix"><ul class="breadcrumb">';
+     $switch = array('odd' => 'even', 'even' => 'odd');
+     $zebra = 'even';
+-    $last = count($variables['breadcrumb']) - 1;    
++    $last = count($variables['breadcrumb']) - 1;
++	
++    array_pop($variables['breadcrumb']);	
+     
+     foreach ($variables['breadcrumb'] as $key => $item) {
+       $zebra = $switch[$zebra];
+@@ -144,7 +146,7 @@ function theme_delta_blocks_breadcrumb($variables) {
+         $attributes['class'][] = 'first';
+       }
+       
+-      if ($key == $last) {
++      if ($key == $last-1) {
+         $attributes['class'][] = 'last';
+       }
+ 
